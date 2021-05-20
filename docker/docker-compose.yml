@@ -1,0 +1,33 @@
+version: "3.1"
+
+services:
+  bot:
+    image: node:14.0
+    tty: true
+    volumes:
+      - ../:/app
+    environment:
+      USERNAME: ${USERNAME}
+      PASSWORD: ${PASSWORD}
+      BOT_TOKEN: ${BOT_TOKEN}
+      HOST_IP: ${HOST_IP}
+    depends_on:
+      - "mongo"
+    command: bash -c "cd app && npm install && npx nodemon"
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - 28017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${PASSWORD}
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${USERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${PASSWORD}
