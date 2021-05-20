@@ -1,5 +1,5 @@
 import MongoClient from 'mongodb'
-
+export const TODO_DATABASE = "TODOList"
 export class MongoGO {
   constructor() {
     this.USERNAME = process.env.USERNAME || 'root'
@@ -7,13 +7,18 @@ export class MongoGO {
     this.HOST_IP = process.env.HOST_IP
     this.DATABASE_URL = `mongodb://${this.USERNAME}:${this.PASSWORD}@${this.HOST_IP}:28017`
   }
-  insert (database, path, data) {
-    MongoClient.connect(this.DATABASE_URL, (err, client) => {
-      if (err) throw err;
-      const db = client.db(database)
-      db.collection(path).insertOne(data).then(doc => console.log(`${doc} inserted`))
-      client.close();
-    })
+  async insert (database, path, data) {
+    const connectWithDB = await MongoClient.connect(this.DATABASE_URL)
+    const databaseInterface = connectWithDB.db(database)
+    const collection = databaseInterface.collection(path)
+    return await collection.insertOne(data)
   }
-
+  async find (database, path, data={}) {
+    const connectWithDB = await MongoClient.connect(this.DATABASE_URL)
+    const databaseInterface = connectWithDB.db(database)
+    const collection = databaseInterface.collection(path)
+    const result = await collection.find(data).toArray()
+    console.log(result)
+    return await collection.find(data).toArray()
+  }
 }

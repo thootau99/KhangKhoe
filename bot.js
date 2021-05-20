@@ -1,26 +1,29 @@
 import {Client, MessageEmbed} from 'discord.js'
-import {MongoGO} from './mongogo.js'
+import {createTodoForId} from './commands/create.js'
+import {findAllTodosForId} from './commands/find.js'
 const client = new Client();
 const TOKEN = process.env.BOT_TOKEN
-const db = new MongoGO();
 let ID = ""
 client.on("ready", () => {
   console.log("I'm ready!!")
   ID = client.user.id
 })
 
-client.on("message", (message) => {
+client.on("message", async (message) => {
   // Your bot on message code goes to here.
-  // db.insert("dc", message.author.id, {message: message.content})
+  createTodoForId(message.author.id, message.content)
   if (message.content.startsWith('!')) {
     const command = message.content.split('!')[1]
     const embed = new MessageEmbed()
-      .setTitle(`You used the ${command} command`)
-      .setColor(0xff0000)
-      .setDescription("This is what the command you used")
-    if (command === 'create') {}
+    if (command === 'find') {
+      const found = await findAllTodosForId(message.author.id)
+      embed.addFields(found.map(foundRecord => {
+        return {name: 'normal', value: foundRecord.message}
+      }))
+      message.channel.send(embed)
+      message.channel.send(JSON.stringify(found))
+    }
     else if (command === 'remove') {}
-    message.channel.send(embed)
   }
 });
 
